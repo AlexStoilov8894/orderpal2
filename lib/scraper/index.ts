@@ -1,3 +1,5 @@
+"use server";
+
 import axios from "axios";
 import * as cheerio from "cheerio";
 import { extractCurrency, extractDescription, extractPrice } from "../utils";
@@ -5,7 +7,7 @@ import { extractCurrency, extractDescription, extractPrice } from "../utils";
 export async function scrapeAmazonProduct(url: string) {
   if (!url) return;
 
-  //Bright Data proxy confing
+  // BrightData proxy configuration
   const username = String(process.env.BRIGHT_DATA_USERNAME);
   const password = String(process.env.BRIGHT_DATA_PASSWORD);
   const port = 22225;
@@ -22,27 +24,24 @@ export async function scrapeAmazonProduct(url: string) {
   };
 
   try {
-    //Fetch
+    // Fetch the product page
     const response = await axios.get(url, options);
     const $ = cheerio.load(response.data);
 
-    // Extract
+    // Extract the product title
     const title = $("#productTitle").text().trim();
-
     const currentPrice = extractPrice(
       $(".priceToPay span.a-price-whole"),
-      $("a.size.base .a-color-price"),
-      $("span.a-price-whole"),
-      $(".a-button-selected .a-color-base"),
-      $(".a-price .a-text-price")
+      $(".a.size.base.a-color-price"),
+      $(".a-button-selected .a-color-base")
     );
 
     const originalPrice = extractPrice(
-      $("#pricebolck_ourprice"),
-      $(".a-price span.a-text-price span.a-offscreen"),
-      $("ElistPrice"),
+      $("#priceblock_ourprice"),
+      $(".a-price.a-text-price span.a-offscreen"),
+      $("#listPrice"),
       $("#priceblock_dealprice"),
-      $(".a-size.base.a-color-price")
+      $(".a-size-base.a-color-price")
     );
 
     const outOfStock =
@@ -57,23 +56,11 @@ export async function scrapeAmazonProduct(url: string) {
     const imageUrls = Object.keys(JSON.parse(images));
 
     const currency = extractCurrency($(".a-price-symbol"));
-
-    const discountRate = $(".savingsPercentage .savingPriceOverride")
-      .text()
-      .replace(/[-%]/g, "");
+    const discountRate = $(".savingsPercentage").text().replace(/[-%]/g, "");
 
     const description = extractDescription($);
-    // console.log({
-    //   title,
-    //   currentPrice,
-    //   originalPrice,
-    //   outOfStock,
-    //   imageUrls,
-    //   currency,
-    //   discountRate,
-    // });
 
-    //Construct data object
+    // Construct data object with scraped information
     const data = {
       url,
       currency: currency || "$",
@@ -95,6 +82,6 @@ export async function scrapeAmazonProduct(url: string) {
 
     return data;
   } catch (error: any) {
-    throw new Error(`Failed to scrape product: ${error.message}`);
+    console.log(error);
   }
 }
