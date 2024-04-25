@@ -110,8 +110,8 @@ export const getEmailNotifType = (
   return null;
 };
 
-export const formatNumber = (num: number = 0) => {
-  return num.toLocaleString(undefined, {
+export const formatNumber = (num = 0) => {
+  return num.toLocaleString("en-US", {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   });

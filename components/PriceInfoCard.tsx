@@ -13,7 +13,8 @@ const PriceInfoCard = ({ title, iconSrc, value }: Props) => {
 
       <div className="flex gap-1">
         <Image src={iconSrc} alt={title} width={24} height={24} />
-        <p className="text-2x1 font-bold text-secondary">{value}</p>
+
+        <p className="text-2xl font-bold text-secondary">{value}</p>
       </div>
     </div>
   );
